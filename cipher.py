@@ -4,6 +4,7 @@ import sys
 import collections
 import pickle
 import os
+import typing
 
 
 def Parser() -> argparse.Namespace:
@@ -19,17 +20,14 @@ def Parser() -> argparse.Namespace:
     return args
 
 
-def fileread(args: argparse.Namespace) -> list:
-    if args.code == "encode" or args.code == "decode" or args.code == "hack":
+def fileread(args: argparse.Namespace) -> typing.List[str]:
+    if args.code in ("encode", "decode", "hack"):
         if args.input_file is None:
             infile = sys.stdin
         else:
             try:
-                if os.path.exists(args.input_file):
-                    infile = open(args.input_file, 'r')
-                else:
-                    raise Exception()
-            except Exception:
+                infile = open(args.input_file, 'r')
+            except FileNotFoundError:
                 print("No such file in directory:", args.input_file)
                 sys.exit()
     elif args.code == "train":
@@ -37,11 +35,8 @@ def fileread(args: argparse.Namespace) -> list:
             infile = sys.stdin
         else:
             try:
-                if os.path.exists(args.text_file):
-                    infile = open(args.text_file, 'r')
-                else:
-                    raise Exception()
-            except Exception:
+                infile = open(args.text_file, 'r')
+            except FileNotFoundError:
                 print("No such file in directory", args.text_file)
                 sys.exit()
     else:
@@ -57,7 +52,7 @@ def fileread(args: argparse.Namespace) -> list:
     return text
 
 
-def textprint(output_file: str, text: list) -> None:
+def textprint(output_file: str, text: typing.List[str]) -> None:
     if output_file is None:
         outfile = sys.stdout
     else:
@@ -76,7 +71,7 @@ def textprint(output_file: str, text: list) -> None:
 
 class Caesar:
     @staticmethod
-    def encode(key: int, itter: list) -> list:
+    def encode(key: int, itter: typing.List[str]) -> typing.List[str]:
         decoded = []
         for chr in itter:
             if chr in string.ascii_lowercase:
@@ -91,7 +86,7 @@ class Caesar:
         return decoded
 
     @staticmethod
-    def decode(key: int, itter: list) -> list:
+    def decode(key: int, itter: typing.List[str]) -> typing.List[str]:
         coded = []
         for chr in itter:
             if chr in string.ascii_lowercase:
@@ -106,14 +101,14 @@ class Caesar:
         return coded
 
 
-class Vigenre:
+class Vigenere:
     @staticmethod
-    def encode(key: str, itter: list) -> list:
+    def encode(key: str, itter: typing.List[str]) -> typing.List[str]:
         i = 0
         key = key.lower()
         for letter in key:
             if letter not in string.ascii_letters:
-                print("Key for vigenre should be a word")
+                print("Key for vigenere should be a word")
                 sys.exit()
         decoded = []
         for chr in itter:
@@ -133,12 +128,12 @@ class Vigenre:
         return decoded
 
     @staticmethod
-    def decode(key: str, itter: list) -> list:
+    def decode(key: str, itter: typing.List[str]) -> typing.List[str]:
         i = 0
         key = key.lower()
         for letter in key:
             if letter not in string.ascii_letters:
-                print("Key for vigenre should be a word")
+                print("Key for vigenere should be a word")
                 sys.exit()
         coded = []
         for chr in itter:
@@ -160,7 +155,7 @@ class Vigenre:
 
 class FreqAnalysis:
     @staticmethod
-    def train(itter: list, model_file: str) -> None:
+    def train(itter: typing.List[str], model_file: str) -> None:
         myDict = collections.Counter(itter)
         alphaNums = 0
         for item in myDict:
@@ -180,10 +175,8 @@ class FreqAnalysis:
             sys.exit()
 
     @staticmethod
-    def hack(itter: list, model_file: str) -> list:
+    def hack(itter: typing.List[str], model_file: str) -> list:
         try:
-            if not os.path.exists(model_file):
-                raise Exception()
             with open(model_file, 'rb') as pickle_file:
                 myDict = pickle.load(pickle_file)
         except Exception:
@@ -209,32 +202,38 @@ class FreqAnalysis:
         return Caesar.decode(keyMin, itter)
 
 
-def Code(args: argparse.Namespace) -> None:
+def code(args: argparse.Namespace) -> None:
     text = fileread(args)
     if args.code == 'encode':
         if args.cipher == 'caesar':
             try:
-                dec_text = Caesar.encode(int(args.key), text)
-                textprint(args.output_file, dec_text)
+                key_int = int(args.key)
             except ValueError:
                 print("Key for caesar should be integer")
-        elif args.cipher == 'vigenre':
-            dec_text = Vigenre.encode(args.key, text)
+                sys.exit()
+            dec_text = Caesar.encode(key_int, text)
+            textprint(args.output_file, dec_text)
+        elif args.cipher == 'vigenere':
+            dec_text = Vigenere.encode(args.key, text)
             textprint(args.output_file, dec_text)
         else:
             print("Sorry i don't know this kind of cipher:", args.cipher)
+            sys.exit()
     elif args.code == 'decode':
         if args.cipher == 'caesar':
             try:
-                dec_text = Caesar.decode(int(args.key), text)
-                textprint(args.output_file, dec_text)
+                key_int = int(args.key)
             except ValueError:
                 print("Key for caesar should be integer")
-        elif args.cipher == 'vigenre':
-            dec_text = Vigenre.decode(args.key, text)
+                sys.exit()
+            dec_text = Caesar.decode(key_int, text)
+            textprint(args.output_file, dec_text)
+        elif args.cipher == 'vigenere':
+            dec_text = Vigenere.decode(args.key, text)
             textprint(args.output_file, dec_text)
         else:
             print("Sorry i don't know this kind of cipher:", args.cipher)
+            sys.exit()
     elif args.code == 'train':
         FreqAnalysis.train(text, args.model_file)
     elif args.code == 'hack':
@@ -242,5 +241,10 @@ def Code(args: argparse.Namespace) -> None:
         textprint(args.output_file, dec_text)
 
 
-args = Parser()
-Code(args)
+def main() -> None:
+    args = Parser()
+    code(args)
+
+
+if __name__ == '__main__':
+    main()
