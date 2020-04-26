@@ -8,7 +8,7 @@ import typing
 from contextlib import contextmanager
 
 
-def Parser() -> argparse.Namespace:
+def arg_parser() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
 
@@ -226,7 +226,7 @@ def code(args: argparse.Namespace) -> None:
 
 
 def main() -> None:
-    args = Parser()
+    args = arg_parser()
     code(args)
 
 
