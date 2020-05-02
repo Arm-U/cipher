@@ -190,6 +190,10 @@ class FreqAnalysis:
 
 
 def code(args: argparse.Namespace) -> None:
+    if not hasattr(args, 'code'):
+        print("Enter something to do: encode, decode, train, hack")
+        sys.exit()
+
     if args.code == 'encode':
         text = fileread(args.input_file)
         if args.cipher == 'caesar':
