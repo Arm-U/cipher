@@ -143,6 +143,78 @@ class Vigenere:
         return Vigenere(self.key).encode(itter)
 
 
+class Vernam:
+    key: str
+    alphabet = {
+        "A": "10000",
+        "B": "00110",
+        "C": "10110",
+        "D": "11110",
+        "E": "01000",
+        "F": "01110",
+        "G": "01010",
+        "H": "11010",
+        "I": "01100",
+        "J": "10010",
+        "K": "10011",
+        "L": "11011",
+        "M": "01011",
+        "N": "01111",
+        "O": "11100",
+        "P": "11111",
+        "Q": "10111",
+        "R": "00111",
+        "S": "00101",
+        "T": "10101",
+        "U": "10100",
+        "V": "11101",
+        "W": "01101",
+        "X": "01001",
+        "Y": "00100",
+        "Z": "11001",
+        "'": "11000",
+        "-": "00000",
+        ":": "00011",
+        ".": "00010",
+        ",": "00001",
+        "/": "10001"
+    }
+
+    def __init__(self, new_key: str) -> None:
+        self.key = new_key
+
+    @staticmethod
+    def xor(str1: str, str2: str) -> str:
+        new_str = ""
+        for i in range(5):
+            new_str += str(
+                (int(str1[i]) + int(str2[i])) % 2
+            )
+        return new_str
+
+    def encode(self, itter: typing.List[str]) -> typing.List[str]:
+        self.key = self.key.upper()
+        new_itter = []
+        ind = 0
+        for letter in itter:
+            if letter.upper() not in self.alphabet:
+                new_itter.append(letter)
+                continue
+            coded = Vernam(self.key).xor(
+                self.alphabet[letter.upper()],
+                self.alphabet[self.key[ind % len(self.key)]]
+            )
+            for item in self.alphabet:
+                if self.alphabet[item] == coded:
+                    letter = item
+            new_itter.append(letter)
+            ind += 1
+        return new_itter
+
+    def decode(self, itter: typing.List[str]) -> typing.List[str]:
+        return Vernam(self.key).encode(itter)
+
+
 class FreqAnalysis:
     model_file: str
 
@@ -205,6 +277,8 @@ def code(args: argparse.Namespace) -> None:
             textprint(args.output_file, Caesar(key_int).encode(text))
         elif args.cipher == 'vigenere':
             textprint(args.output_file, Vigenere(args.key).encode(text))
+        elif args.cipher == 'vernam':
+            textprint(args.output_file, Vernam(args.key).encode(text))
         else:
             print("Sorry i don't know this kind of cipher:", args.cipher)
             sys.exit()
@@ -219,6 +293,8 @@ def code(args: argparse.Namespace) -> None:
             textprint(args.output_file, Caesar(key_int).decode(text))
         elif args.cipher == 'vigenere':
             textprint(args.output_file, Vigenere(args.key).decode(text))
+        elif args.cipher == 'vernam':
+            textprint(args.output_file, Vernam(args.key).decode(text))
         else:
             print("Sorry i don't know this kind of cipher:", args.cipher)
             sys.exit()
