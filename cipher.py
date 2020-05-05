@@ -80,9 +80,6 @@ def textprint(output_file: typing.Any, text: typing.List[str]) -> None:
 class Caesar:
     key: int
 
-    def __init__(self, new_key: int) -> None:
-        self.key = new_key
-
     def encode(self, itter: typing.List[str]) -> typing.List[str]:
         decoded = []
         for chr in itter:
@@ -98,15 +95,13 @@ class Caesar:
         return decoded
 
     def decode(self, itter: typing.List[str]) -> typing.List[str]:
+        old_key = self.key
         self.key *= -1
-        return Caesar(self.key).encode(itter)
+        return self.encode(itter)
 
 
 class Vigenere:
     key: str
-
-    def __init__(self, new_key: str) -> None:
-        self.key = new_key
 
     def encode(self, itter: typing.List[str]) -> typing.List[str]:
         i = 0
@@ -134,13 +129,14 @@ class Vigenere:
 
     def decode(self, itter: typing.List[str]) -> typing.List[str]:
         myList = []
+        old_str = self.key
         self.key = self.key.lower()
         for letter in self.key:
             myList.append(
                 string.ascii_lowercase[-string.ascii_lowercase.find(letter)]
             )
         self.key = "".join(myList)
-        return Vigenere(self.key).encode(itter)
+        return self.encode(itter)
 
 
 class Vernam:
@@ -180,9 +176,6 @@ class Vernam:
         "/": "10001"
     }
 
-    def __init__(self, new_key: str) -> None:
-        self.key = new_key
-
     @staticmethod
     def xor(str1: str, str2: str) -> str:
         new_str = ""
@@ -196,11 +189,13 @@ class Vernam:
         self.key = self.key.upper()
         new_itter = []
         ind = 0
+        vernam = Vernam()
         for letter in itter:
             if letter.upper() not in self.alphabet:
                 new_itter.append(letter)
                 continue
-            coded = Vernam(self.key).xor(
+            vernam.key = self.key
+            coded = vernam.xor(
                 self.alphabet[letter.upper()],
                 self.alphabet[self.key[ind % len(self.key)]]
             )
@@ -212,7 +207,7 @@ class Vernam:
         return new_itter
 
     def decode(self, itter: typing.List[str]) -> typing.List[str]:
-        return Vernam(self.key).encode(itter)
+        return self.encode(itter)
 
 
 class FreqAnalysis:
@@ -245,9 +240,11 @@ class FreqAnalysis:
         minMeas = 100
         key = 1
         keyMin = 0
+        caesar = Caesar()
         while key <= 25:
             measure = 0
-            newItter = Caesar(key).decode(itter)
+            caesar.key = key
+            newItter = caesar.decode(itter)
             itterDict = collections.Counter(
                 item.lower() for item in newItter
                 if item in string.ascii_letters
@@ -258,7 +255,8 @@ class FreqAnalysis:
                 minMeas = measure
                 keyMin = key
             key += 1
-        return Caesar(keyMin).decode(itter)
+        caesar.key = keyMin
+        return caesar.decode(itter)
 
 
 def code(args: argparse.Namespace) -> None:
@@ -266,7 +264,7 @@ def code(args: argparse.Namespace) -> None:
         print("Enter something to do: encode, decode, train, hack")
         sys.exit()
 
-    if args.code == 'encode':
+    if args.code in ('encode', 'decode'):
         text = fileread(args.input_file)
         if args.cipher == 'caesar':
             try:
@@ -274,30 +272,21 @@ def code(args: argparse.Namespace) -> None:
             except ValueError:
                 print("Key for caesar should be integer")
                 sys.exit()
-            textprint(args.output_file, Caesar(key_int).encode(text))
+            cipher = Caesar()
+            cipher.key = key_int
         elif args.cipher == 'vigenere':
-            textprint(args.output_file, Vigenere(args.key).encode(text))
+            cipher = Vigenere()
+            cipher.key = args.key
         elif args.cipher == 'vernam':
-            textprint(args.output_file, Vernam(args.key).encode(text))
+            cipher = Vernam()
+            cipher.key = args.key
         else:
-            print("Sorry i don't know this kind of cipher:", args.cipher)
+            print("No such cipher type")
             sys.exit()
-    elif args.code == 'decode':
-        text = fileread(args.input_file)
-        if args.cipher == 'caesar':
-            try:
-                key_int = int(args.key)
-            except ValueError:
-                print("Key for caesar should be integer")
-                sys.exit()
-            textprint(args.output_file, Caesar(key_int).decode(text))
-        elif args.cipher == 'vigenere':
-            textprint(args.output_file, Vigenere(args.key).decode(text))
-        elif args.cipher == 'vernam':
-            textprint(args.output_file, Vernam(args.key).decode(text))
+        if args.code == 'encode':
+            textprint(args.output_file, cipher.encode(text))
         else:
-            print("Sorry i don't know this kind of cipher:", args.cipher)
-            sys.exit()
+            textprint(args.output_file, cipher.decode(text))
     elif args.code == 'train':
         FreqAnalysis(args.model_file).train(fileread(args.text_file))
     elif args.code == 'hack':
