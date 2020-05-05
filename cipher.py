@@ -110,7 +110,6 @@ class Vigenere:
 
     def encode(self, itter: typing.List[str]) -> typing.List[str]:
         i = 0
-        self.key = self.key.lower()
         for letter in self.key:
             if letter not in self.alphabet:
                 print("Key for vigenere should be a word")
@@ -128,7 +127,6 @@ class Vigenere:
 
     def decode(self, itter: typing.List[str]) -> typing.List[str]:
         myList = []
-        self.key = self.key.lower()
         for letter in self.key:
             myList.append(
                 self.alphabet[-self.alphabet.find(letter)]
