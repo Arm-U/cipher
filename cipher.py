@@ -1,5 +1,4 @@
 import argparse
-import string
 import sys
 import collections
 import pickle
@@ -77,7 +76,15 @@ def textprint(output_file: typing.Any, text: typing.List[str]) -> None:
         outfile.write("".join(text))
 
 
-class Caesar:
+class Cipher:
+    def encode(self, itter: typing.List[str]) -> typing.List[str]:
+        pass
+
+    def decode(self, itter: typing.List[str]) -> typing.List[str]:
+        pass
+
+
+class Caesar(Cipher):
     key: int
     alphabet: str = ("abcdefghijklmnopqrstuvwxyz"
                      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -100,7 +107,7 @@ class Caesar:
         return self.encode(itter)
 
 
-class Vigenere:
+class Vigenere(Cipher):
     key: str
     alphabet: str = ("abcdefghijklmnopqrstuvwxyz"
                      "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -135,7 +142,7 @@ class Vigenere:
         return self.encode(itter)
 
 
-class Vernam:
+class Vernam(Cipher):
     key: str
     alphabet = {
         "A": "10000",
@@ -267,6 +274,7 @@ def code(args: argparse.Namespace) -> None:
 
     if args.code in ('encode', 'decode'):
         text = fileread(args.input_file)
+        cipher = Cipher()
         if args.cipher == 'caesar':
             try:
                 key_int = int(args.key)
