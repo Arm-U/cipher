@@ -79,49 +79,48 @@ def textprint(output_file: typing.Any, text: typing.List[str]) -> None:
 
 class Caesar:
     key: int
+    alphabet: str = ("abcdefghijklmnopqrstuvwxyz"
+                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                     "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+                     "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+                     "1234567890!?'(),.-:;_/")
 
     def encode(self, itter: typing.List[str]) -> typing.List[str]:
         decoded = []
         for chr in itter:
-            if chr in string.ascii_lowercase:
-                chr = string.ascii_lowercase[
-                    (string.ascii_lowercase.find(chr) + self.key) % 26
-                    ]
-            if chr in string.ascii_uppercase:
-                chr = string.ascii_uppercase[
-                    (string.ascii_uppercase.find(chr) + self.key) % 26
+            if chr in self.alphabet:
+                chr = self.alphabet[
+                    (self.alphabet.find(chr) + self.key) % len(self.alphabet)
                     ]
             decoded.append(chr)
         return decoded
 
     def decode(self, itter: typing.List[str]) -> typing.List[str]:
-        old_key = self.key
         self.key *= -1
         return self.encode(itter)
 
 
 class Vigenere:
     key: str
+    alphabet: str = ("abcdefghijklmnopqrstuvwxyz"
+                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                     "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+                     "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+                     "1234567890!?'(),.-:;_/")
 
     def encode(self, itter: typing.List[str]) -> typing.List[str]:
         i = 0
         self.key = self.key.lower()
         for letter in self.key:
-            if letter not in string.ascii_letters:
+            if letter not in self.alphabet:
                 print("Key for vigenere should be a word")
                 sys.exit()
         decoded = []
         for chr in itter:
-            if chr in string.ascii_lowercase:
-                chr = string.ascii_lowercase[
-                    (string.ascii_lowercase.find(chr) +
-                     string.ascii_lowercase.find(self.key[i])) % 26
-                    ]
-                i = (i + 1) % len(self.key)
-            if chr in string.ascii_uppercase:
-                chr = string.ascii_uppercase[
-                    (string.ascii_uppercase.find(chr) +
-                     string.ascii_lowercase.find(self.key[i])) % 26
+            if chr in self.alphabet:
+                chr = self.alphabet[
+                    (self.alphabet.find(chr) +
+                     self.alphabet.find(self.key[i])) % len(self.alphabet)
                     ]
                 i = (i + 1) % len(self.key)
             decoded.append(chr)
@@ -129,11 +128,10 @@ class Vigenere:
 
     def decode(self, itter: typing.List[str]) -> typing.List[str]:
         myList = []
-        old_str = self.key
         self.key = self.key.lower()
         for letter in self.key:
             myList.append(
-                string.ascii_lowercase[-string.ascii_lowercase.find(letter)]
+                self.alphabet[-self.alphabet.find(letter)]
             )
         self.key = "".join(myList)
         return self.encode(itter)
@@ -212,13 +210,18 @@ class Vernam:
 
 class FreqAnalysis:
     model_file: str
+    alphabet: str = ("abcdefghijklmnopqrstuvwxyz"
+                     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                     "абвгдеёжзийклмнопрстуфхцчшщъыьэюя"
+                     "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ"
+                     "1234567890!?'(),.-:;_/")
 
     def __init__(self, new_model_file: str) -> None:
         self.model_file = new_model_file
 
     def train(self, itter: typing.List[str]) -> None:
         myDict = collections.Counter(
-            item.lower() for item in itter if item in string.ascii_letters
+            item.lower() for item in itter if item in self.alphabet
         )
         alphaNums = sum(myDict.values())
         if alphaNums == 0:
@@ -247,7 +250,7 @@ class FreqAnalysis:
             newItter = caesar.decode(itter)
             itterDict = collections.Counter(
                 item.lower() for item in newItter
-                if item in string.ascii_letters
+                if item in self.alphabet
             )
             for item in myDict:
                 measure += abs(myDict[item] - itterDict[item] / alphaNums)
