@@ -42,7 +42,7 @@ class Vernam(Cipher):
     @staticmethod
     def xor(str1: str, str2: str) -> str:
         new_str = ""
-        for i in range(5):
+        for i in range(len(str1)):
             new_str += str(
                 (int(str1[i]) + int(str2[i])) % 2
             )

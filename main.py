@@ -6,7 +6,6 @@ from freqanalysis import FreqAnalysis
 from filemanager import fileread
 from filemanager import textprint
 from parser import arg_parser
-import typing
 import sys
 import argparse
 

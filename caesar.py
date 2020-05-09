@@ -22,4 +22,6 @@ class Caesar(Cipher):
 
     def decode(self, itter: typing.List[str]) -> typing.List[str]:
         self.key *= -1
-        return self.encode(itter)
+        result = self.encode(itter)
+        self.key *= -1
+        return result

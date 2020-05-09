@@ -29,11 +29,15 @@ class FreqAnalysis:
         for item in myDict:
             onlyAlpha[item] = myDict[item] / alphaNums
         with get_stream(self.model_file, 'wb') as pickle_file:
-            pickle.dump(onlyAlpha, pickle_file)
+                pickle.dump(onlyAlpha, pickle_file)
 
     def hack(self, itter: typing.List[str]) -> typing.List[str]:
-        with get_stream(self.model_file, 'rb') as pickle_file:
-            myDict = pickle.load(pickle_file)
+        try:
+            with get_stream(self.model_file, 'rb') as pickle_file:
+                myDict = pickle.load(pickle_file)
+        except FileNotFoundError:
+            print("No such file in directory", self.model_file)
+            sys.exit()
         alphaNums = sum(collections.Counter(itter).values())
         if alphaNums == 0:
             print("Model-file should contain letters")

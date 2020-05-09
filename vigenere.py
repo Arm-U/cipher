@@ -1,5 +1,6 @@
 from cipher import Cipher
 import typing
+import sys
 
 
 class Vigenere(Cipher):
@@ -33,5 +34,8 @@ class Vigenere(Cipher):
             myList.append(
                 self.alphabet[-self.alphabet.find(letter)]
             )
+        original_key = self.key
         self.key = "".join(myList)
-        return self.encode(itter)
+        result = self.encode(itter)
+        self.key = original_key
+        return result
