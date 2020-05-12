@@ -46,7 +46,7 @@ class FreqAnalysis:
         key = 1
         keyMin = 0
         caesar = Caesar()
-        while key <= 25:
+        while key <= len(self.alphabet):
             measure = 0
             caesar.key = key
             newItter = caesar.decode(itter)
